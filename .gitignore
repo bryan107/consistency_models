@@ -13,9 +13,13 @@ _pycache__/
 # PyPI distribution artifacts.
 build/
 dist/
+models/
 
 # Tests
 .pytest_cache/
 
 # Other
 *.DS_Store
+
+# model
+*.pt
