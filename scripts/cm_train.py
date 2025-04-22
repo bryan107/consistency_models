@@ -17,6 +17,7 @@ from cm.script_util import (
 )
 from cm.train_util import CMTrainLoop
 import torch.distributed as dist
+import wandb
 import copy
 
 
@@ -36,6 +37,7 @@ def main():
         total_steps=args.total_training_steps,
         distill_steps_per_iter=args.distill_steps_per_iter,
     )
+
     if args.training_mode == "progdist":
         distillation = False
     elif "consistency" in args.training_mode:
@@ -117,6 +119,20 @@ def main():
     if args.use_fp16:
         target_model.convert_to_fp16()
 
+
+    wandb.init(
+        entity="actrec",
+        project="consistency-model",
+        notes="",
+        tags=["baseline", "paper1"],
+        # Record the run's hyperparameters.
+        config={"target_model": args.target_model,
+                "lr": args.lr,
+                "weight_decay": args.weight_decay,
+                "lr_anneal_steps": args.lr_anneal_steps,
+                "batch_size": batch_size
+        }, 
+    )
     logger.log("training...")
     CMTrainLoop(
         model=model,
