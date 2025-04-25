@@ -16,8 +16,7 @@ from cm.script_util import (
     create_ema_and_scales_fn,
 )
 from cm.train_util import CMTrainLoop
-import torch.distributed as dist
-import wandb
+import torch.distributed as dist # type: ignore
 import copy
 
 
@@ -83,6 +82,8 @@ def main():
             **teacher_model_and_diffusion_kwargs,
         )
 
+        logger.info(f"Teacher model path: {args.teacher_model_path}")
+
         teacher_model.load_state_dict(
             dist_util.load_state_dict(args.teacher_model_path, map_location="cpu"),
         )
@@ -119,20 +120,6 @@ def main():
     if args.use_fp16:
         target_model.convert_to_fp16()
 
-
-    wandb.init(
-        entity="actrec",
-        project="consistency-model",
-        notes="",
-        tags=["baseline", "paper1"],
-        # Record the run's hyperparameters.
-        config={"target_model": args.target_model,
-                "lr": args.lr,
-                "weight_decay": args.weight_decay,
-                "lr_anneal_steps": args.lr_anneal_steps,
-                "batch_size": batch_size
-        }, 
-    )
     logger.log("training...")
     CMTrainLoop(
         model=model,
@@ -156,6 +143,7 @@ def main():
         schedule_sampler=schedule_sampler,
         weight_decay=args.weight_decay,
         lr_anneal_steps=args.lr_anneal_steps,
+        wandb = args.wandb
     ).run_loop()
 
 
@@ -179,6 +167,7 @@ def create_argparser():
     defaults.update(model_and_diffusion_defaults())
     defaults.update(cm_train_defaults())
     parser = argparse.ArgumentParser()
+    parser.add_argument("--wandb", action="store_true", help="if enable wandb")
     add_dict_to_argparser(parser, defaults)
     return parser
 

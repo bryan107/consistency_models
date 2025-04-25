@@ -12,7 +12,7 @@ python cm_train.py \
 --total_training_steps 600000 \
 --loss_norm l2 \
 --lr_anneal_steps 0 \
---teacher_model_path ../models/mnist.pt \
+--teacher_model_path ../models/mnist/score_net_epoch20.pt \
 --attention_resolutions 32,16,8 \
 --class_cond True \
 --use_scale_shift_norm True \
@@ -30,4 +30,4 @@ python cm_train.py \
 --use_fp16 True \
 --weight_decay 0.0 \
 --weight_schedule uniform \
---data_dir /path/to/data
+--data_dir ../data/mnist

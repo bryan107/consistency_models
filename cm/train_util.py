@@ -8,6 +8,8 @@ import torch.distributed as dist
 from torch.nn.parallel.distributed import DistributedDataParallel as DDP
 from torch.optim import RAdam
 
+import wandb # type: ignore
+
 from . import dist_util, logger
 from .fp16_util import MixedPrecisionTrainer
 from .nn import update_ema
@@ -274,6 +276,7 @@ class CMTrainLoop(TrainLoop):
         training_mode,
         ema_scale_fn,
         total_training_steps,
+        wandb,
         **kwargs,
     ):
         super().__init__(**kwargs)
@@ -316,6 +319,22 @@ class CMTrainLoop(TrainLoop):
                     self.step = 0
             else:
                 self.step = self.global_step % self.lr_anneal_steps
+        
+        self.wandb = wandb
+        if wandb:
+            wandb.init(
+                entity="actrec",
+                project="consistency-model",
+                notes="",
+                tags=["baseline", "paper1"],
+                # Record the run's hyperparameters.
+                config={"target_model": self.target_model,
+                        "lr": self.lr,
+                        "weight_decay": self.weight_decay,
+                        "lr_anneal_steps": self.lr_anneal_steps,
+                        "batch_size": self.batch_size
+                }, 
+            )       
 
     def _load_and_sync_target_parameters(self):
         resume_checkpoint = find_resume_checkpoint() or self.resume_checkpoint
@@ -384,6 +403,9 @@ class CMTrainLoop(TrainLoop):
         # Save the last checkpoint if it wasn't already saved.
         if not saved:
             self.save()
+
+        if wandb:
+            wandb.finish()
 
     def run_step(self, batch, cond):
         self.forward_backward(batch, cond)
@@ -605,6 +627,8 @@ def find_ema_checkpoint(main_checkpoint, step, rate):
 def log_loss_dict(diffusion, ts, losses):
     for key, values in losses.items():
         logger.logkv_mean(key, values.mean().item())
+        if wandb:
+            wandb.log({f"Train_Loss({key})": np.mean(values.mean().item())})
         # Log the quantiles (four quartiles, in particular).
         for sub_t, sub_loss in zip(ts.cpu().numpy(), values.detach().cpu().numpy()):
             quartile = int(4 * sub_t / diffusion.num_timesteps)

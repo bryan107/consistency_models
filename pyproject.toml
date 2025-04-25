@@ -1,0 +1,32 @@
+[project]
+name = "consistency-models"
+version = "0.1.0"  # Specify your project version
+description = "Description of your project"  # Optional
+authors = [
+    { name = "Your Name", email = "youremail@example.com" }  # Optional
+]
+dependencies = [
+    "blobfile>=1.0.5",
+    "torch",
+    "tqdm",
+    "numpy",
+    "scipy",
+    "pandas",
+    "Cython",
+    "piq==0.7.0",
+    "joblib==0.14.0",
+    "albumentations==0.4.3",
+    "lmdb",
+    "clip @ git+https://github.com/openai/CLIP.git",
+    "mpi4py",
+    "flash-attn==0.2.8",
+    "pillow",
+    "wandb"
+]
+
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["cm", "evaluations"]

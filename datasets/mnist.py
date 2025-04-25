@@ -21,7 +21,7 @@ class MNIST_dataset():
 
         self.train_dset = MNISTDataDictWrapper(
             torchvision.datasets.MNIST(
-                root=".data/",
+                root="data/",
                 train=True,
                 download=True,
                 transform=transforms.Compose(
@@ -32,7 +32,7 @@ class MNIST_dataset():
        
         self.val_dset = MNISTDataDictWrapper(
             torchvision.datasets.MNIST(
-                root=".data/",
+                root="data/",
                 train=False,
                 download=True,
                 transform=transforms.Compose(
@@ -43,7 +43,7 @@ class MNIST_dataset():
         
         self.test_dset = MNISTDataDictWrapper(
             torchvision.datasets.MNIST(
-                root=".data/",
+                root="data/",
                 train=False,
                 download=True,
                 transform=transforms.Compose(
