@@ -26,3 +26,5 @@ models/
 
 #env
 myenv/*
+data/*
+models/*
